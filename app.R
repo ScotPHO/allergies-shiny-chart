@@ -20,7 +20,7 @@ data <- read_csv("//stats/phip/Website/Administration/Shiny/data/allergic_condit
   melt(variable.name = "year")
 data$year <- gsub("y", "", data$year)
 
-# saveRDS(data, "./data/hepatitisc_board.rds")
+ saveRDS(data, "./data/allergic_conditionsrds")
 
 data <- readRDS("./data/allergic_conditions.rds")
 
