@@ -1,4 +1,4 @@
-#Code to create chart of hepatitis c by board.
+#Code to create chart of allergic conditions for ScotPHO website.
 
 ############################.
 ## Global ----
@@ -10,21 +10,35 @@ library(dplyr) #data manipulation
 library(plotly) #charts
 library(shiny)
 
-#Preparing data - not needed unless new data coming through
-library(reshape2)
-library (readr)
 
-data <- read_csv("//stats/phip/Website/Administration/Shiny/data/allergic_conditions.csv") %>%
-  mutate_if(is.character, factor) %>%  #converting characters into factors
-  setNames(tolower(names(.))) %>%
-  melt(variable.name = "year")
-data$year <- gsub("y", "", data$year)
+# Preparing data - not needed unless new data coming through
 
- saveRDS(data, "./data/allergic_conditionsrds")
+# library(reshape2)
+# library (readr)
+# 
+# data <- read_csv("//stats/phip/Website/Administration/Shiny/data/allergic_conditions.csv") %>%
+#   mutate_if(is.character, factor) %>%  #converting characters into factors
+#   setNames(tolower(names(.))) %>%
+#   melt(variable.name = "year")
+# data$year <- gsub("y", "", data$year)
+# 
+# saveRDS(data, "./data/allergic_conditions.rds")
+# 
+ data <- readRDS("./data/allergic_conditions.rds")
 
-data <- readRDS("./data/allergic_conditions.rds")
+#PRA Data - not to be published
 
-#Use for selection of areas
+# data <- read_csv("//stats/phip/Website/Administration/Shiny/data/allergic_conditionsPRA.csv") %>%
+#   mutate_if(is.character, factor) %>%  #converting characters into factors
+#   setNames(tolower(names(.))) %>%
+#   melt(variable.name = "year")
+# data$year <- gsub("y", "", data$year)
+# 
+# saveRDS(data, "./data/allergic_conditionsPRA.rds")
+# 
+# data <- readRDS("./data/allergic_conditionsPRA.rds")
+
+#Use for selection of conditions
 condition_list <- sort(unique(data$condition))
 
 #ScotPHO logo. 
@@ -47,8 +61,8 @@ ui <- fluidPage(style="width: 650px; height: 500px; ",
                                     ), selected = "CIS Rate")
                     ),
                     div(style = "width: 50%; float: left;",
-                        selectInput("area", label = "Select a condition", 
-                                    choices = condition_list))
+                        selectizeInput("conditions", label = "Select a condition", 
+                                    choices = condition_list, multiple = TRUE, options = list(placeholder = "Select up to 4 conditions", maxItems =4L)))
                 ),
                 div(style= "width:100%; float: left;", #Main panel
                     plotlyOutput("chart", width = "100%", height = "350px"),
@@ -56,15 +70,14 @@ ui <- fluidPage(style="width: 650px; height: 500px; ",
                           HTML("Source: <a href='http://www.isdscotland.org/Health-Topics/Hospital-Care/Diagnoses/'>ISD, SMR 01</a>")),
                       div(style = "width: 25%; float: left;",
                           downloadLink('download_data', 'Download data')),
-                      div(style = "width: 50%; float: left;",
-                          "Notes: 1. These statistics are derived from data collected on discharges from hospitals for non-obstetric and 
-    non-psychiatric hospitals (SMR01) in Scotland.
-2. Data is for Main Diagnosis only.
+                      div(style = "width: 100%; float: left;",
+                          h6("Notes: 1. These statistics are derived from data collected on discharges from hospitals for non-obstetric and 
+    non-psychiatric hospitals (SMR01) in Scotland.", tags$br() , "
+2. Data is for Main Diagnosis only.", tags$br() , "
 3. Continuous Inpatient Stay (CIS) - A continuous inpatient stay is an unbroken period of time that a patient spends as an inpatient.
-    A patient may change consultant, significant facility, speciality and/ or hospital during a CIS.
-4. Data is for Scottish residents treated in Scotland.
-5. Data is based on Financial Years which run from 1st April to 31st March.
-")
+    A patient may change consultant, significant facility, speciality and/ or hospital during a CIS.", tags$br() , "
+4. Data is for Scottish residents treated in Scotland.", tags$br() , "
+5. Data is based on Financial Years which run from 1st April to 31st March."))
                     )
                 )
 )
@@ -82,19 +95,23 @@ server <- function(input, output) {
   ############################.
   #Visualization
   output$chart <- renderPlotly({
-    #For Island plots and rates plot an empty chart
-    
 
       #Data for condition
-      data_condition <- data %>% subset(condition==input$area & measure==input$measure)
+      data_condition <- data %>% subset(condition %in% input$conditions & measure==input$measure)
       
       #y axis title
-      yaxistitle <- ifelse(input$measure == "CIS", "Number of Continuous Inpatient Stays (CIS)", ifelse(input$mearsure == "Patients", "Number of Patients", ifelse(input$mearsure == "CIS Rate", "Continuous Inpatient Stays (CIS), per 100,000 population",ifelse(input$mearsure == "Patient Rate", "Patients, per 100,000 population"))))
-      
-      plot <- plot_ly(data=data_condition, x=~year, y = ~value, 
-                      type = "scatter", mode = 'lines',  line = list(color = '#08519c'),
-                      name = unique(data_condition$condition), width = 650, height = 350) %>% 
-      #Layout
+      yaxistitle <- case_when(input$measure == "CIS" ~ "Number of Continuous Inpatient Stays (CIS)",
+                              input$measure == "Patients" ~ "Number of Patients",
+                              input$measure == "CIS Rate" ~ "Continuous Inpatient Stays (CIS),<br>per 100,000 population",
+                              input$measure == "Patient Rate" ~ "Patients, per 100,000 population")
+
+      plot <- plot_ly(data=data_condition, x=~year, y = ~value, color = ~condition,
+                      colors = c('#abd9e9', '#74add1', '#4575b4', '#313695', '#022031'),
+                      type = "scatter", mode = 'lines',
+                      width = 650, height = 350) %>% 
+#name = unique(data$condition$condition)
+        
+        #Layout
         layout(annotations = list(), #It needs this because of a buggy behaviour
                yaxis = list(title = yaxistitle, rangemode="tozero", fixedrange=TRUE), 
                xaxis = list(title = "Financial Year",  fixedrange=TRUE),  
