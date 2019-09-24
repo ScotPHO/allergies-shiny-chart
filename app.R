@@ -12,38 +12,28 @@ library(shiny)
 
 
 # Preparing data - not needed unless new data coming through
-
-# library(reshape2)
-# library (readr)
+#  library(tidyr)
 # 
-# data <- read_csv("//stats/phip/Website/Administration/Shiny/data/allergic_conditions.csv") %>%
-#   mutate_if(is.character, factor) %>%  #converting characters into factors
-#   setNames(tolower(names(.))) %>%
-#   melt(variable.name = "year")
-# data$year <- gsub("y", "", data$year)
+# data_allergy <- readRDS("/PHI_conf/ScotPHO/Website/Topics/Allergy/sept2019_update/allergy_scotland_chart.rds") %>%
+#    mutate(rate = round(rate, 1), # round numbers more (one decimal place)
+#           numerator = case_when(numerator < 5 ~ NA_real_,
+#                                 TRUE ~ numerator)) %>%  # supression of under 5
+#    gather(measure, value, -c(type, year)) %>%
+#    mutate(measure = recode(measure, "numerator" = "Number", "rate" = "Rate"))
 # 
-# saveRDS(data, "./data/allergic_conditions.rds")
-# 
- data <- readRDS("./data/allergic_conditions.rds")
-
+#  saveRDS(data_allergy, "data/allergy_scotland_chart.rds")
 #PRA Data - not to be published
-
-# data <- read_csv("//stats/phip/Website/Administration/Shiny/data/allergic_conditionsPRA.csv") %>%
-#   mutate_if(is.character, factor) %>%  #converting characters into factors
-#   setNames(tolower(names(.))) %>%
-#   melt(variable.name = "year")
-# data$year <- gsub("y", "", data$year)
-# 
-# saveRDS(data, "./data/allergic_conditionsPRA.rds")
-# 
-# data <- readRDS("./data/allergic_conditionsPRA.rds")
+ # saveRDS(data_allergy, "data/allergy_scotland_chart_PRA.rds")
+ 
+ data_allergy <- readRDS("data/allergy_scotland_chart.rds") 
+ #data_allergy <- readRDS("data/allergy_scotland_chart_PRA.rds") 
 
 #Use for selection of conditions
-condition_list <- sort(unique(data$condition))
+condition_list <- sort(unique(data_allergy$type))
 
 #ScotPHO logo. 
 #Needs to be https address or if local in code 64 (the latter does not work with 4.7 plotly)
-scotpho_logo <-  list(source ="https://raw.githubusercontent.com/jvillacampa/test/master/scotpho.png",
+scotpho_logo <-  list(source ="https://raw.githubusercontent.com/ScotPHO/plotly-charts/master/scotpho.png",
                       xref = "paper", yref = "paper",
                       x= -0.09, y= 1.2, sizex = 0.22, sizey = 0.18, opacity = 1)
 
@@ -54,15 +44,15 @@ scotpho_logo <-  list(source ="https://raw.githubusercontent.com/jvillacampa/tes
 #Using divs as issues with classing css 
 ui <- fluidPage(style="width: 650px; height: 500px; ", 
                 div(style= "width:100%", #Filters on top of page
-                    h4("Chart 1. Acute Hospital Inpatient/Day Case Discharges with selected diagnoses"),
+                    h4("Chart 1. Hospital admissions for different allergic conditions"),
                     div(style = "width: 50%; float: left;",
-                        selectInput("measure", label = "Select a measure type",
-                                    choices = c("CIS", "Patients", "CIS Rate", "Patient Rate"
-                                    ), selected = "CIS Rate")
+                        selectInput("measure", label = "Select numbers or rates",
+                                    choices = c("Number", "Rate"), selected = "Rate")
                     ),
                     div(style = "width: 50%; float: left;",
-                        selectizeInput("conditions", label = "Select a condition", 
-                                    choices = condition_list, multiple = TRUE, options = list(placeholder = "Select up to 4 conditions", maxItems =4L)))
+                        selectizeInput("conditions", label = "Select one or more allergic conditions (up to four)", 
+                                    choices = condition_list, multiple = TRUE, selected = "All allergies",
+                                    options = list(maxItems =4L)))
                 ),
                 div(style= "width:100%; float: left;", #Main panel
                     plotlyOutput("chart", width = "100%", height = "350px"),
@@ -73,14 +63,11 @@ ui <- fluidPage(style="width: 650px; height: 500px; ",
                       div(style = "width: 100%; float: left;",
                           h6("Notes: 1. These statistics are derived from data collected on discharges from hospitals for non-obstetric and 
     non-psychiatric hospitals (SMR01) in Scotland.", tags$br() , "
-2. Data is for Main Diagnosis only.", tags$br() , "
-3. Continuous Inpatient Stay (CIS) - A continuous inpatient stay is an unbroken period of time that a patient spends as an inpatient.
-    A patient may change consultant, significant facility, speciality and/ or hospital during a CIS.", tags$br() , "
-4. Data is for Scottish residents treated in Scotland.", tags$br() , "
-5. Data is based on Financial Years which run from 1st April to 31st March."))
+              2. Data is for main diagnosis only and for Scottish residents .")
                     )
                 )
 )
+)#fluid page bracket
 
 ############################.
 ## Server ----
@@ -90,36 +77,32 @@ server <- function(input, output) {
   # Allowing user to download data
   output$download_data <- downloadHandler( 
     filename =  'allergic_conditions.csv', content = function(file) { 
-      write.csv(data, file, row.names=FALSE) })
+      write.csv(data_allergy, file, row.names=FALSE) })
   
   ############################.
   #Visualization
   output$chart <- renderPlotly({
 
       #Data for condition
-      data_condition <- data %>% subset(condition %in% input$conditions & measure==input$measure)
+      data_condition <- data_allergy %>% subset(type %in% input$conditions & measure==input$measure)
       
       #y axis title
-      yaxistitle <- case_when(input$measure == "CIS" ~ "Number of Continuous Inpatient Stays (CIS)",
-                              input$measure == "Patients" ~ "Number of Patients",
-                              input$measure == "CIS Rate" ~ "Continuous Inpatient Stays (CIS),<br>per 100,000 population",
-                              input$measure == "Patient Rate" ~ "Patients, per 100,000 population")
+      yaxistitle <- case_when(input$measure == "Number" ~ "Number of hospital admissions",
+                              input$measure == "Rate" ~ "Hospital admissions <br>per 100,000 population")
 
-      plot <- plot_ly(data=data_condition, x=~year, y = ~value, color = ~condition,
+      plot <- plot_ly(data=data_condition, x=~year, y = ~value, color = ~type,
                       colors = c('#abd9e9', '#74add1', '#4575b4', '#313695', '#022031'),
                       type = "scatter", mode = 'lines',
                       width = 650, height = 350) %>% 
-#name = unique(data$condition$condition)
-        
         #Layout
         layout(annotations = list(), #It needs this because of a buggy behaviour
                yaxis = list(title = yaxistitle, rangemode="tozero", fixedrange=TRUE), 
-               xaxis = list(title = "Financial Year",  fixedrange=TRUE),  
+               xaxis = list(title = "Financial year",  fixedrange=TRUE, tickangle = 270),  
                font = list(family = 'Arial, sans-serif'), #font
-               margin = list(pad = 4, t = 50), #margin-paddings
+               margin = list(pad = 4, t = 50, r = 30), #margin-paddings
                hovermode = 'false',  # to get hover compare mode as default
                images = scotpho_logo) %>% 
-        config(displayModeBar= T, displaylogo = F, collaborate=F, editable =F) # taking out plotly logo and collaborate button
+        config(displayModeBar= T, displaylogo = F) # taking out plotly logo and collaborate button
     }
   ) 
   
