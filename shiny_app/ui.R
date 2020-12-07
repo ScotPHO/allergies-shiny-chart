@@ -19,7 +19,7 @@ fluidPage(style="width: 650px; height: 500px; ",
                 div(style= "width:100%; float: left;", #Main panel
                     plotlyOutput("chart", width = "100%", height = "350px"),
                     p(div(style = "width: 25%; float: left;", #Footer
-                          HTML("Source: <a href='http://www.isdscotland.org/Health-Topics/Hospital-Care/Diagnoses/'>ISD, SMR 01</a>")),
+                          HTML("Source: <a href='https://beta.isdscotland.org/find-publications-and-data/health-services/hospital-care/'>PHS, SMR 01</a>")),
                       div(style = "width: 25%; float: left;",
                           downloadLink('download_data', 'Download data')),
                       div(style = "width: 100%; float: left;",
