@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-.Rproj
+*.Rproj
 
 allergies_chart.Rproj
 deploying_app.R
