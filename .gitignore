@@ -7,6 +7,7 @@
 allergies_chart.Rproj
 deploying_app.R
 testing.R
+create_credentials.R
 
 # packrat library folder (automatically added due to packract being initialised)
 packrat/lib*/
