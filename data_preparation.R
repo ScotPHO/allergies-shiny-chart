@@ -2,7 +2,7 @@
 library(tidyr)
 library(dplyr)
 
-data_allergy <- readRDS("/PHI_conf/ScotPHO/Website/Topics/Allergy/december2020_update/allergy_scotland_chart.rds") %>%
+data_allergy <- readRDS("/PHI_conf/ScotPHO/Website/Topics/Allergy/sept2021_update/allergy_scotland_chart.rds") %>%
   mutate(rate = round(rate, 1), # round numbers more (one decimal place)
          numerator = case_when(numerator < 5 ~ NA_real_,
                                TRUE ~ numerator)) %>%  # supression of under 5
