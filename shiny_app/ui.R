@@ -3,7 +3,7 @@
 ############################.
 #Height and widths as percentages to allow responsiveness
 #Using divs as issues with classing css 
-#secure_app(
+secure_app(
 fluidPage(style="width: 650px; height: 500px; ", 
                 div(style= "width:100%", #Filters on top of page
                     h4("Chart 1. Hospital admissions for different allergic conditions"),
@@ -30,4 +30,4 @@ fluidPage(style="width: 650px; height: 500px; ",
                     )
                 )
 )#fluid page bracket
-#)
+)
