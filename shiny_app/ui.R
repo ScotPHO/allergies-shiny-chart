@@ -20,7 +20,7 @@ fluidPage(style="width: 650px; height: 500px; ",
                     #plotlyOutput("chart", width = "100%", height = "350px"),
                     highchartOutput("line_chart"),
                     p(div(style = "width: 25%; float: left;", #Footer
-                          HTML("Source: <a href='https://publichealthscotland.scot/resources-and-tools/health-intelligence-and-data-management/national-data-catalogue/national-datasets/search-the-datasets/general-acute-inpatient-and-day-case-scottish-morbidity-record-smr01/'>PHS, SMR 01</a>")),
+                          HTML("Source: <a href='https://publichealthscotland.scot/resources-and-tools/health-intelligence-and-data-management/national-data-catalogue/national-datasets/search-the-datasets/general-acute-inpatient-and-day-case-scottish-morbidity-record-smr01/' target='_blank'>PHS, SMR 01</a>")),
                       div(style = "width: 25%; float: left;",
                           downloadLink('download_data', 'Download data')),
                       div(style = "width: 100%; float: left;",
