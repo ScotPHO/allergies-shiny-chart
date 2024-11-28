@@ -11,7 +11,7 @@ library(shiny)
 library(shinymanager)
 library(phsstyles) #chart colours
 
-data_allergy <- readRDS(paste0(filepath, "allergy_scotland_chart.rds"))
+data_allergy <- readRDS("allergy_scotland_chart.rds")
 
 #Use for selection of conditions
 condition_list <- sort(unique(data_allergy$type))

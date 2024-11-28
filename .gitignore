@@ -8,6 +8,7 @@ allergies_chart.Rproj
 deploying_app.R
 testing.R
 create_credentials.R
+credentials.R
 
 # packrat library folder (automatically added due to packract being initialised)
 packrat/lib*/
@@ -20,6 +21,9 @@ www/
 
 # folder created when deploying an app #
 rsconnect/
+
+# admin folder #
+admin/
 
 # Common text files that may contain data #
 *.[cC][sS][vV]

@@ -1,7 +1,7 @@
 ############################.
 ## Server ----
 ############################.
-#credentials_allergy <- readRDS("credentials.rds")
+credentials_allergy <- readRDS("admin/credentials.rds")
 
 function(input, output) {
   
