@@ -3,7 +3,7 @@
 ############################.
 #Height and widths as percentages to allow responsiveness
 #Using divs as issues with classing css 
-secure_app(
+#secure_app(
 fluidPage(style="width: 650px; height: 500px; ", 
                 div(style= "width:100%", #Filters on top of page
                     h4("Chart 1. Hospital admissions for different allergic conditions"),
@@ -12,14 +12,15 @@ fluidPage(style="width: 650px; height: 500px; ",
                                     choices = c("Number", "Rate"), selected = "Rate")
                     ),
                     div(style = "width: 50%; float: left;",
-                        selectizeInput("conditions", label = "Select one or more allergic conditions (up to four)", 
+                        selectizeInput("conditions", label = "Select up to four allergic conditions", 
                                        choices = condition_list, multiple = TRUE, selected = "All allergies",
                                        options = list(maxItems =4L)))
                 ),
                 div(style= "width:100%; float: left;", #Main panel
-                    plotlyOutput("chart", width = "100%", height = "350px"),
+                    #plotlyOutput("chart", width = "100%", height = "350px"),
+                    highchartOutput("line_chart"),
                     p(div(style = "width: 25%; float: left;", #Footer
-                          HTML("Source: <a href='https://beta.isdscotland.org/find-publications-and-data/health-services/hospital-care/'>PHS, SMR 01</a>")),
+                          HTML("Source: <a href='https://publichealthscotland.scot/resources-and-tools/health-intelligence-and-data-management/national-data-catalogue/national-datasets/search-the-datasets/general-acute-inpatient-and-day-case-scottish-morbidity-record-smr01/' target='_blank'>PHS, SMR 01</a>")),
                       div(style = "width: 25%; float: left;",
                           downloadLink('download_data', 'Download data')),
                       div(style = "width: 100%; float: left;",
@@ -30,4 +31,4 @@ fluidPage(style="width: 650px; height: 500px; ",
                     )
                 )
 )#fluid page bracket
-)
+#)
