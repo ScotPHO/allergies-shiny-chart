@@ -1,18 +1,18 @@
 ############################.
 ## Server ----
 ############################.
-credentials_allergy <- readRDS("admin/credentials.rds")
+#credentials_allergy <- readRDS("admin/credentials.rds")
 
 function(input, output) {
   
-  # Shinymanager Auth
-  res_auth <- secure_server(
-    check_credentials = check_credentials(credentials_allergy)
-  )
-  
-  output$auth_output <- renderPrint({
-    reactiveValuesToList(res_auth)
-  })
+  # # Shinymanager Auth
+  # res_auth <- secure_server(
+  #   check_credentials = check_credentials(credentials_allergy)
+  # )
+  # 
+  # output$auth_output <- renderPrint({
+  #   reactiveValuesToList(res_auth)
+  # })
   
   # Allowing user to download data
   output$download_data <- downloadHandler( 
